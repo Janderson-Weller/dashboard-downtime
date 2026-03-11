@@ -1,0 +1,171 @@
+﻿<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="pageTitle">Dashboard de Paradas</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+  <div class="theme-switch-shell">
+    <div class="form-check form-switch theme-switch">
+      <input id="themeSwitch" class="form-check-input" type="checkbox" role="switch" />
+      <label id="themeSwitchLabel" class="form-check-label" for="themeSwitch">Tema</label>
+    </div>
+  </div>
+
+  <main class="container dashboard-shell py-4 py-lg-5">
+    <section id="uploadSection" class="upload-shell fade-in">
+      <article class="upload-card">
+        <p id="uploadEyebrow" class="eyebrow mb-2">Base de dados</p>
+        <h1 id="uploadTitle" class="mb-2">Envie a planilha para iniciar o dashboard</h1>
+        <p id="uploadSubtitle" class="upload-subtitle mb-0">Arraste o arquivo XLSX ou selecione no seu computador.</p>
+
+        <div id="uploadDropzone" class="upload-dropzone mt-4" role="button" tabindex="0"
+          aria-describedby="uploadDropHint">
+          <p id="uploadDropTitle" class="upload-drop-title mb-1">Arraste e solte o arquivo aqui</p>
+          <p id="uploadDropHint" class="upload-drop-hint mb-3">Formato aceito: .xlsx</p>
+          <button id="uploadButton" type="button" class="btn btn-light upload-btn">Selecionar arquivo</button>
+          <input id="fileInput" type="file" class="d-none" accept=".xlsx,.xls" />
+        </div>
+
+        <p id="uploadError" class="upload-error mt-3 mb-0 d-none"></p>
+      </article>
+    </section>
+
+    <section id="dashboardSection" class="d-none">
+      <section class="hero-card mb-4 fade-in">
+        <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-center">
+          <div>
+            <p id="heroEyebrow" class="eyebrow mb-2">Operações e Confiabilidade</p>
+            <h1 id="heroTitle" class="mb-2">Parada de Linha Packing</h1>
+            <p id="datasetInfo" class="hero-subtitle mb-0">Carregando planilha...</p>
+          </div>
+          <div class="kpi-grid">
+            <article class="kpi-card">
+              <span id="kpiEventsLabel">Ocorrências</span>
+              <strong id="kpiEvents">0</strong>
+            </article>
+            <article class="kpi-card">
+              <span id="kpiMinutesLabel">Minutos brutos</span>
+              <strong id="kpiMinutes">0</strong>
+            </article>
+            <article class="kpi-card">
+              <span id="kpiAreasLabel">Áreas impactadas</span>
+              <strong id="kpiAreas">0</strong>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel-card mb-4 fade-in" style="animation-delay: 80ms">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-6 col-lg">
+            <label id="languageFilterLabel" for="languageFilter" class="form-label">Idioma</label>
+            <select id="languageFilter" class="form-select"></select>
+          </div>
+          <div class="col-md-6 col-lg">
+            <label id="monthFilterLabel" for="monthFilter" class="form-label">Filtrar por mês</label>
+            <select id="monthFilter" class="form-select"></select>
+          </div>
+          <div class="col-md-6 col-lg">
+            <label id="dayFilterLabel" for="dayFilter" class="form-label">Filtrar por dia</label>
+            <select id="dayFilter" class="form-select"></select>
+          </div>
+          <div class="col-md-6 col-lg">
+            <label id="shiftFilterLabel" for="shiftFilter" class="form-label">Filtrar por turno</label>
+            <select id="shiftFilter" class="form-select"></select>
+          </div>
+          <div class="col-md-6 col-lg">
+            <label id="departmentFilterLabel" for="departmentFilter" class="form-label">Filtrar por departamento</label>
+            <select id="departmentFilter" class="form-select"></select>
+          </div>
+          <div class="col-md-6 col-lg">
+            <label id="lineFilterLabel" for="lineFilter" class="form-label">Filtrar por linha</label>
+            <select id="lineFilter" class="form-select"></select>
+          </div>
+          <div class="col-md-6 col-lg-auto">
+            <label class="form-label d-none d-lg-block">&nbsp;</label>
+            <button id="replaceFileButton" type="button" class="btn btn-replace-file w-100">Trocar arquivo</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="row g-4 mb-4">
+        <div class="col-lg-7">
+          <article class="panel-card h-100 fade-in" style="animation-delay: 120ms">
+            <div class="d-flex justify-content-between flex-wrap gap-2 mb-3">
+              <h2 id="areasCardTitle" class="section-title mb-0">Áreas por tempo de parada</h2>
+              <span id="areasCardPill" class="pill">Ordenado do maior para o menor</span>
+            </div>
+            <div class="chart-wrap">
+              <canvas id="areasPieChart" aria-label="Gráfico de pizza das áreas"></canvas>
+            </div>
+            <ul id="areasLegend" class="legend-list mt-3 mb-0"></ul>
+          </article>
+        </div>
+
+        <div class="col-lg-5">
+          <article class="panel-card h-100 fade-in" style="animation-delay: 160ms">
+            <div class="d-flex justify-content-between flex-wrap gap-2 mb-3">
+              <h2 id="shiftsCardTitle" class="section-title mb-0">Top 3 turnos com mais parada</h2>
+              <span id="shiftsCardPill" class="pill">Acumulado por turno</span>
+            </div>
+            <div id="turnosRanking" class="rank-list"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel-card mb-4 fade-in" style="animation-delay: 200ms">
+        <div class="d-flex justify-content-between flex-wrap gap-2 mb-3">
+          <h2 id="problemsByAreaTitle" class="section-title mb-0">Top 3 problemas de cada área</h2>
+          <span id="problemsByAreaPill" class="pill">Ranking por tipo de problema</span>
+        </div>
+        <div id="areaProblems" class="row g-3"></div>
+      </section>
+
+      <section class="panel-card fade-in" style="animation-delay: 240ms">
+        <div class="d-flex justify-content-between flex-wrap gap-2 mb-3">
+          <h2 id="tableCardTitle" class="section-title mb-0">Tabela de problemas</h2>
+          <div class="d-flex align-items-end gap-2 flex-wrap">
+            <div>
+              <label id="tableStatusFilterLabel" for="tableStatusFilter" class="form-label mb-1">Filtrar status da
+                tabela</label>
+              <select id="tableStatusFilter" class="form-select form-select-sm table-status-select"></select>
+            </div>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table align-middle mb-0 problems-table">
+            <thead>
+              <tr>
+                <th id="thDepartment">Departamento</th>
+                <th id="thLine">Linha</th>
+                <th id="thType">Tipo</th>
+                <th id="thDescription">Descrição</th>
+                <th id="thModel">Modelo do produto</th>
+                <th id="thMinutes" class="text-end">Minutos</th>
+                <th id="thStatus">Status</th>
+              </tr>
+            </thead>
+            <tbody id="problemsTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <div id="loadingOverlay" class="loading-overlay d-none" aria-live="polite" aria-busy="true">
+    <div class="loading-card">
+      <div class="spinner-border text-light" role="status" aria-hidden="true"></div>
+      <p id="loadingMessage" class="loading-message mb-0">Carregando...</p>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+
+</html>
