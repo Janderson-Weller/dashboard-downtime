@@ -137,6 +137,7 @@ const textosFixos: Array<[string, TranslationTextKey]> = [
   ["problemsByAreaPill", "problemsByAreaPill"],
   ["tableCardTitle", "tableCardTitle"],
   ["thDepartment", "thDepartment"],
+  ["thShift", "thShift"],
   ["thLine", "thLine"],
   ["thType", "thType"],
   ["thDescription", "thDescription"],
@@ -1292,7 +1293,7 @@ function renderizarTabelaProblemas(registros: RegistroParada[]): void {
 
   if (!registros.length) {
     ui.corpoTabela.innerHTML =
-      `<tr><td colspan="7"><div class="empty-state">${escaparHtml(t.emptyTable)}</div></td></tr>`;
+      `<tr><td colspan="8"><div class="empty-state">${escaparHtml(t.emptyTable)}</div></td></tr>`;
     return;
   }
 
@@ -1310,6 +1311,7 @@ function renderizarTabelaProblemas(registros: RegistroParada[]): void {
                 separarResponsaveis(item.responsavel),
             ),
           )}</td>
+          <td>${escaparHtml(item.turno)}</td>
           <td>${escaparHtml(item.linha)}</td>
           <td>${escaparHtml(traduzirDinamico(item.tipo))}</td>
           <td>${escaparHtml(traduzirDinamico(item.descricao))}</td>
@@ -1333,7 +1335,7 @@ function renderizarEstadoVazio(): void {
   ui.legendaAreas.innerHTML = `<li class="empty-state">${escaparHtml(t.emptyGeneric)}</li>`;
   ui.rankingTurnos.innerHTML = `<div class="empty-state">${escaparHtml(t.emptyGeneric)}</div>`;
   ui.problemasPorArea.innerHTML = `<div class="col-12"><div class="empty-state">${escaparHtml(t.emptyGeneric)}</div></div>`;
-  ui.corpoTabela.innerHTML = `<tr><td colspan="7"><div class="empty-state">${escaparHtml(t.emptyGeneric)}</div></td></tr>`;
+  ui.corpoTabela.innerHTML = `<tr><td colspan="8"><div class="empty-state">${escaparHtml(t.emptyGeneric)}</div></td></tr>`;
 }
 
 function formatarDuracaoHoras(totalMinutos: number): string {

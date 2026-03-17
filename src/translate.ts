@@ -48,6 +48,7 @@ export type TranslationPack = {
   tableCardTitle: string;
   tableCardPill: string;
   thDepartment: string;
+  thShift: string;
   thLine: string;
   thType: string;
   thDescription: string;
@@ -124,6 +125,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
     tableCardTitle: "Tabela de problemas",
     tableCardPill: "Registros filtrados",
     thDepartment: "Departamento",
+    thShift: "Turno",
     thLine: "Linha",
     thType: "Tipo",
     thDescription: "Descrição",
@@ -196,6 +198,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
     tableCardTitle: "Problems table",
     tableCardPill: "Filtered records",
     thDepartment: "Department",
+    thShift: "Shift",
     thLine: "Line",
     thType: "Type",
     thDescription: "Description",
@@ -268,6 +271,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
     tableCardTitle: "问题明细表",
     tableCardPill: "筛选后记录",
     thDepartment: "部门",
+    thShift: "班次",
     thLine: "产线",
     thType: "类型",
     thDescription: "描述",
@@ -340,6 +344,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
     tableCardTitle: "Problemtabelle",
     tableCardPill: "Gefilterte Datensätze",
     thDepartment: "Abteilung",
+    thShift: "Schicht",
     thLine: "Linie",
     thType: "Typ",
     thDescription: "Beschreibung",
@@ -412,6 +417,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
     tableCardTitle: "Tabla de problemas",
     tableCardPill: "Registros filtrados",
     thDepartment: "Departamento",
+    thShift: "Turno",
     thLine: "Línea",
     thType: "Tipo",
     thDescription: "Descripción",
@@ -484,6 +490,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
     tableCardTitle: "جدول المشاكل",
     tableCardPill: "السجلات المفلترة",
     thDepartment: "القسم",
+    thShift: "الوردية",
     thLine: "الخط",
     thType: "النوع",
     thDescription: "الوصف",
