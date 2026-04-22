@@ -1312,13 +1312,14 @@ function renderizarTopProblemasPorArea(registros: RegistroParada[]): void {
       const topProblemas = agruparEstatisticasPorTipo(itens)
         .sort((a, b) => b.perdas - a.perdas)
         .slice(0, 3);
+      const perdasTop = topProblemas.reduce((soma, problema) => soma + problema.perdas, 0);
       const responsaveis = extrairResponsaveis(itens);
-      return { area, total, totalPerdas, topProblemas, responsaveis };
+      return { area, total, totalPerdas, perdasTop, topProblemas, responsaveis };
     })
-    .sort((a, b) => b.totalPerdas - a.totalPerdas);
+    .sort((a, b) => b.perdasTop - a.perdasTop);
 
   ui.problemasPorArea.innerHTML = areas
-    .map((area) => {
+    .map((area, indice) => {
       const listaProblemas = area.topProblemas
         .map(
           (problema) => `
@@ -1333,8 +1334,11 @@ function renderizarTopProblemasPorArea(registros: RegistroParada[]): void {
       return `
         <div class="col-md-6 col-xl-4">
           <article class="area-card">
-            <h3>${escaparHtml(formatarDepartamentoComResponsaveis(area.area, area.responsaveis))}</h3>
-            <p class="area-total">${formatadorNumero.format(area.total)} ${escaparHtml(t.minutesInPeriodSuffix)}</p>
+            <div class="area-card-header">
+              <span class="area-rank-avatar">${indice + 1}</span>
+              <h3 class="mb-0">${escaparHtml(formatarDepartamentoComResponsaveis(area.area, area.responsaveis))}</h3>
+            </div>
+            <p class="area-total">${formatadorInteiro.format(area.totalPerdas)} ${escaparHtml(t.piecesLostSuffix)} · ${formatadorNumero.format(area.total)} ${escaparHtml(t.minutesInPeriodSuffix)}</p>
             <ol class="problem-list">
               ${listaProblemas || `<li>${escaparHtml(t.noProblemsRegistered)}</li>`}
             </ol>

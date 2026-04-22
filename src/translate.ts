@@ -155,7 +155,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
     emptyTable: "Nenhum problema encontrado para os filtros aplicados.",
     emptyGeneric: "Sem dados para exibir.",
     noProblemsRegistered: "Sem problemas registrados.",
-    minutesInPeriodSuffix: "minutos no período",
+    minutesInPeriodSuffix: "minutos",
     minuteUnit: "min",
     shiftPrefix: "Turno",
     linePrefix: "Linha",
