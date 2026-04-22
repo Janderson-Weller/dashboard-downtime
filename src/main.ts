@@ -24,6 +24,8 @@ type RegistroParada = {
   modelo: string;
   status: string;
   minutosParados: number;
+  perdas: number;
+  valorTotal: number;
 };
 
 type Filtros = {
@@ -46,11 +48,8 @@ type Colunas = {
   modelo: number;
   responsavel: number;
   status: number;
-};
-
-type ItemRanking = {
-  label: string;
-  total: number;
+  perdas: number;
+  valorTotal: number;
 };
 
 type TranslationTextKey = {
@@ -100,11 +99,13 @@ const ui = {
   kpiOcorrencias: obterElemento<HTMLElement>("kpiEvents"),
   kpiMinutosBrutos: obterElemento<HTMLElement>("kpiMinutes"),
   kpiAreas: obterElemento<HTMLElement>("kpiAreas"),
-  legendaAreas: obterElemento<HTMLUListElement>("areasLegend"),
+  kpiPerdas: obterElemento<HTMLElement>("kpiLosses"),
+  kpiValorTotal: obterElemento<HTMLElement>("kpiUnitValue"),
+  legendaPerdas: obterElemento<HTMLUListElement>("lossesLegend"),
   rankingTurnos: obterElemento<HTMLDivElement>("turnosRanking"),
   problemasPorArea: obterElemento<HTMLDivElement>("areaProblems"),
   corpoTabela: obterElemento<HTMLTableSectionElement>("problemsTableBody"),
-  canvasPizza: obterElemento<HTMLCanvasElement>("areasPieChart"),
+  canvasPizzaPerdas: obterElemento<HTMLCanvasElement>("lossesPieChart"),
   loadingOverlay: obterElemento<HTMLDivElement>("loadingOverlay"),
   loadingMessage: obterElemento<HTMLParagraphElement>("loadingMessage"),
 };
@@ -122,6 +123,8 @@ const textosFixos: Array<[string, TranslationTextKey]> = [
   ["kpiEventsLabel", "kpiEvents"],
   ["kpiMinutesLabel", "kpiGrossMinutes"],
   ["kpiAreasLabel", "kpiAreas"],
+  ["kpiLossesLabel", "kpiLosses"],
+  ["kpiUnitValueLabel", "kpiUnitValue"],
   ["languageFilterLabel", "languageLabel"],
   ["monthFilterLabel", "filterMonth"],
   ["dayFilterLabel", "filterDay"],
@@ -129,12 +132,12 @@ const textosFixos: Array<[string, TranslationTextKey]> = [
   ["departmentFilterLabel", "filterDepartment"],
   ["lineFilterLabel", "filterLine"],
   ["tableStatusFilterLabel", "filterTableStatus"],
-  ["areasCardTitle", "areasCardTitle"],
-  ["areasCardPill", "areasCardPill"],
   ["shiftsCardTitle", "shiftsCardTitle"],
   ["shiftsCardPill", "shiftsCardPill"],
   ["problemsByAreaTitle", "problemsByAreaTitle"],
   ["problemsByAreaPill", "problemsByAreaPill"],
+  ["lossesCardTitle", "lossesCardTitle"],
+  ["lossesCardPill", "lossesCardPill"],
   ["tableCardTitle", "tableCardTitle"],
   ["thDepartment", "thDepartment"],
   ["thShift", "thShift"],
@@ -144,11 +147,19 @@ const textosFixos: Array<[string, TranslationTextKey]> = [
   ["thModel", "thModel"],
   ["thStatus", "thStatus"],
   ["thMinutes", "thMinutes"],
+  ["thPiecesLost", "thPiecesLost"],
 ];
 
 let formatadorNumero = new Intl.NumberFormat(getTranslation(estado.idioma).locale);
+let formatadorInteiro = new Intl.NumberFormat(getTranslation(estado.idioma).locale, {
+  maximumFractionDigits: 0,
+});
+let formatadorMoeda = new Intl.NumberFormat(getTranslation(estado.idioma).locale, {
+  style: "currency",
+  currency: "BRL",
+});
 let formatadorData = new Intl.DateTimeFormat(getTranslation(estado.idioma).locale);
-let graficoAreas: any = null;
+let graficoPerdas: any = null;
 let requisicaoTraducaoAtual = 0;
 let loadingPendencias = 0;
 const cacheTraducoesDinamicas = new Map<string, string>();
@@ -383,6 +394,8 @@ function aplicarIdioma(idioma: LanguageCode): void {
   document.title = t.pageTitle;
 
   formatadorNumero = new Intl.NumberFormat(t.locale);
+  formatadorInteiro = new Intl.NumberFormat(t.locale, { maximumFractionDigits: 0 });
+  formatadorMoeda = new Intl.NumberFormat(t.locale, { style: "currency", currency: "BRL" });
   formatadorData = new Intl.DateTimeFormat(t.locale);
 
   for (const [id, chave] of textosFixos) {
@@ -390,7 +403,7 @@ function aplicarIdioma(idioma: LanguageCode): void {
   }
 
   atualizarRotuloSwitchTema();
-  ui.canvasPizza.setAttribute("aria-label", t.pieAriaLabel);
+  ui.canvasPizzaPerdas.setAttribute("aria-label", t.lossesPieAriaLabel);
   ui.loadingMessage.textContent = t.loadingData;
 
   if (!estado.registros.length) {
@@ -772,6 +785,8 @@ function mapearColunas(cabecalho: string[]): Colunas {
     modelo: encontrarIndiceColuna(cabecalho, ["modelo", "produto"]),
     responsavel: encontrarIndiceColuna(cabecalho, ["responsavel"], false),
     status: encontrarIndiceColuna(cabecalho, ["status"], false),
+    perdas: encontrarIndiceColuna(cabecalho, ["perdas"], false),
+    valorTotal: encontrarIndiceColuna(cabecalho, ["valor_unitario", "valor total", "valor total"], false),
   };
 
   const obrigatorias: Array<[string, number]> = [
@@ -804,18 +819,22 @@ function mapearColunas(cabecalho: string[]): Colunas {
   return colunas;
 }
 
-function encontrarIndiceColuna(cabecalho: string[], aliases: string[], obrigatoria = true): number {
+function encontrarIndiceColuna(cabecalho: string[], aliases: string[], _obrigatoria = true): number {
   const normalizados = cabecalho.map((nome) => normalizarTexto(nome));
-  for (const alias of aliases) {
-    const alvo = normalizarTexto(alias);
-    const indice = normalizados.findIndex((coluna) => coluna === alvo || coluna.includes(alvo));
+  const alvos = aliases.map((alias) => normalizarTexto(alias));
+
+  for (const alvo of alvos) {
+    const indice = normalizados.findIndex((coluna) => coluna === alvo);
     if (indice >= 0) {
       return indice;
     }
   }
 
-  if (!obrigatoria) {
-    return -1;
+  for (const alvo of alvos) {
+    const indice = normalizados.findIndex((coluna) => coluna.includes(alvo));
+    if (indice >= 0) {
+      return indice;
+    }
   }
 
   return -1;
@@ -834,6 +853,8 @@ function converterLinhaEmRegistro(linha: unknown[], colunas: Colunas): RegistroP
   const data = converterData(linha[colunas.data]);
   const responsavelColuna = colunas.responsavel >= 0 ? limparTexto(linha[colunas.responsavel]) : "";
   const statusColuna = colunas.status >= 0 ? limparTexto(linha[colunas.status]) : "";
+  const perdas = colunas.perdas >= 0 ? numeroNaoNegativo(linha[colunas.perdas]) : 0;
+  const valorTotal = colunas.valorTotal >= 0 ? numeroNaoNegativo(linha[colunas.valorTotal]) : 0;
 
   return {
     data,
@@ -849,7 +870,14 @@ function converterLinhaEmRegistro(linha: unknown[], colunas: Colunas): RegistroP
     modelo: limparTexto(linha[colunas.modelo]) || "Sem modelo",
     status: statusColuna,
     minutosParados,
+    perdas,
+    valorTotal,
   };
+}
+
+function numeroNaoNegativo(valor: unknown): number {
+  const numero = converterNumero(valor);
+  return Number.isFinite(numero) && numero > 0 ? numero : 0;
 }
 
 function popularFiltros(registros: RegistroParada[]): void {
@@ -942,7 +970,7 @@ function atualizarDashboard(): void {
 
   atualizarSubtitulo(filtrados);
   atualizarKpis(filtrados);
-  renderizarTopAreas(filtrados);
+  renderizarTopAreasPerdas(filtrados);
   renderizarTopTurnos(filtrados);
   renderizarTopProblemasPorArea(filtrados);
   renderizarTabelaProblemas(filtradosTabela);
@@ -996,46 +1024,50 @@ function formatarOcorrencias(total: number): string {
 function atualizarKpis(registros: RegistroParada[]): void {
   const totalMinutosBrutos = registros.reduce((soma, item) => soma + item.minutosParados, 0);
   const totalAreas = new Set(registros.map((item) => item.departamento)).size;
+  const totalPerdas = registros.reduce((soma, item) => soma + item.perdas, 0);
+  const totalValorTotal = registros.reduce((soma, item) => soma + item.valorTotal, 0);
 
   ui.kpiOcorrencias.textContent = formatadorNumero.format(registros.length);
   ui.kpiMinutosBrutos.textContent = formatarDuracaoHoras(totalMinutosBrutos);
   ui.kpiAreas.textContent = formatadorNumero.format(totalAreas);
+  ui.kpiPerdas.textContent = formatadorInteiro.format(totalPerdas);
+  ui.kpiValorTotal.textContent = formatadorMoeda.format(totalValorTotal);
 }
 
-function renderizarTopAreas(registros: RegistroParada[]): void {
+function renderizarTopAreasPerdas(registros: RegistroParada[]): void {
   const t = traducaoAtual();
   const agrupado = agruparPor(registros, (item) => item.departamento);
-  const rankingAreas = Array.from(agrupado.entries())
+  const ranking = Array.from(agrupado.entries())
     .map(([departamento, itens]) => {
       const responsaveis = extrairResponsaveis(itens);
       const responsavelPrincipal = responsaveis[0] ?? "";
       return {
         label: formatarDepartamentoComResponsaveis(departamento, [responsavelPrincipal]),
-        total: itens.reduce((soma, item) => soma + item.minutosParados, 0),
+        totalPerdas: itens.reduce((soma, item) => soma + item.perdas, 0),
+        totalMinutos: itens.reduce((soma, item) => soma + item.minutosParados, 0),
       };
     })
-    .sort((a, b) => b.total - a.total);
+    .filter((item) => item.totalPerdas > 0)
+    .sort((a, b) => b.totalPerdas - a.totalPerdas);
 
-  if (!rankingAreas.length) {
-    destruirGraficoAreas();
-    ui.legendaAreas.innerHTML = `<li class="empty-state">${escaparHtml(t.emptyChart)}</li>`;
+  if (!ranking.length) {
+    destruirGraficoPerdas();
+    ui.legendaPerdas.innerHTML = `<li class="empty-state">${escaparHtml(t.emptyChart)}</li>`;
     return;
   }
 
-  const cores = gerarCoresPizza(rankingAreas.length);
-  const labelsTraduzidos = rankingAreas.map((item) => item.label);
+  const cores = gerarCoresPizza(ranking.length);
+  const labels = ranking.map((item) => item.label);
 
-  if (graficoAreas) {
-    graficoAreas.destroy();
-  }
+  destruirGraficoPerdas();
 
-  graficoAreas = new Chart(ui.canvasPizza, {
+  graficoPerdas = new Chart(ui.canvasPizzaPerdas, {
     type: "pie",
     data: {
-      labels: labelsTraduzidos,
+      labels,
       datasets: [
         {
-          data: rankingAreas.map((item) => item.total),
+          data: ranking.map((item) => item.totalPerdas),
           backgroundColor: cores,
           borderColor: "#ffffff",
           borderWidth: 2,
@@ -1051,59 +1083,77 @@ function renderizarTopAreas(registros: RegistroParada[]): void {
     },
   });
 
-  const total = rankingAreas.reduce((soma, item) => soma + item.total, 0);
+  const totalGeral = ranking.reduce((soma, item) => soma + item.totalPerdas, 0);
 
-  ui.legendaAreas.innerHTML = rankingAreas
+  ui.legendaPerdas.innerHTML = ranking
     .map((item, indice) => {
-      const percentual = total > 0 ? Math.round((item.total / total) * 100) : 0;
-      const labelLegenda = labelsTraduzidos[indice] ?? item.label;
+      const percentual = totalGeral > 0 ? Math.round((item.totalPerdas / totalGeral) * 100) : 0;
+      const labelLegenda = labels[indice] ?? item.label;
+      const perdasTexto = `${formatadorInteiro.format(item.totalPerdas)} ${t.pieceUnit}`;
+      const minutosTexto = `${formatadorNumero.format(item.totalMinutos)} ${t.minuteUnit}`;
       return `
         <li>
           <span class="legend-main">
             <span class="swatch" style="background:${cores[indice]}"></span>
             ${escaparHtml(labelLegenda)}
           </span>
-          <span class="legend-minutes">${formatadorNumero.format(item.total)} ${escaparHtml(t.minuteUnit)} (${percentual}%)</span>
+          <span class="legend-minutes">${escaparHtml(perdasTexto)} (${percentual}%) · ${escaparHtml(minutosTexto)}</span>
         </li>
       `;
     })
     .join("");
 }
 
-function destruirGraficoAreas(): void {
-  if (graficoAreas) {
-    graficoAreas.destroy();
-    graficoAreas = null;
+function destruirGraficoPerdas(): void {
+  if (graficoPerdas) {
+    graficoPerdas.destroy();
+    graficoPerdas = null;
   }
 }
 
 function renderizarTopTurnos(registros: RegistroParada[]): void {
   const t = traducaoAtual();
-  const ranking = gerarRanking(registros, (item) => item.turno).slice(0, 3);
+
+  const acumulado = new Map<string, { total: number; perdas: number }>();
+  for (const item of registros) {
+    const label = item.turno || "Sem informação";
+    const atual = acumulado.get(label) ?? { total: 0, perdas: 0 };
+    atual.total += item.minutosParados;
+    atual.perdas += item.perdas;
+    acumulado.set(label, atual);
+  }
+  const ranking = Array.from(acumulado.entries())
+    .map(([label, stats]) => ({ label, ...stats }))
+    .sort((a, b) => b.perdas - a.perdas)
+    .slice(0, 3);
 
   if (!ranking.length) {
     ui.rankingTurnos.innerHTML = `<div class="empty-state">${escaparHtml(t.emptyShifts)}</div>`;
     return;
   }
 
-  const primeiroItem = ranking[0];
-  if (!primeiroItem) {
-    ui.rankingTurnos.innerHTML = `<div class="empty-state">${escaparHtml(t.emptyShifts)}</div>`;
-    return;
-  }
-  const maiorValor = primeiroItem.total || 1;
+  const maiorMinutos = Math.max(1, ...ranking.map((r) => r.total));
+  const maiorPerdas = Math.max(1, ...ranking.map((r) => r.perdas));
 
   ui.rankingTurnos.innerHTML = ranking
     .map((item, indice) => {
-      const largura = Math.max(6, Math.round((item.total / maiorValor) * 100));
+      const larguraMinutos = Math.max(6, Math.round((item.total / maiorMinutos) * 100));
+      const larguraPerdas = Math.max(6, Math.round((item.perdas / maiorPerdas) * 100));
       return `
         <article class="rank-item">
           <div class="rank-row">
             <span class="rank-label">#${indice + 1} - ${escaparHtml(rotuloTurno(item.label))}</span>
             <span class="rank-value">${formatadorNumero.format(item.total)} ${escaparHtml(t.minuteUnit)}</span>
           </div>
-          <div class="progress" role="progressbar" aria-valuenow="${largura}" aria-valuemin="0" aria-valuemax="100">
-            <div class="progress-bar" style="width: ${largura}%"></div>
+          <div class="progress" role="progressbar" aria-valuenow="${larguraMinutos}" aria-valuemin="0" aria-valuemax="100">
+            <div class="progress-bar" style="width: ${larguraMinutos}%"></div>
+          </div>
+          <div class="rank-row rank-row-secondary">
+            <span class="rank-sublabel">${escaparHtml(t.piecesLostSuffix)}</span>
+            <span class="rank-value">${formatadorInteiro.format(item.perdas)} ${escaparHtml(t.pieceUnit)}</span>
+          </div>
+          <div class="progress progress-losses" role="progressbar" aria-valuenow="${larguraPerdas}" aria-valuemin="0" aria-valuemax="100">
+            <div class="progress-bar" style="width: ${larguraPerdas}%"></div>
           </div>
         </article>
       `;
@@ -1258,18 +1308,25 @@ function renderizarTopProblemasPorArea(registros: RegistroParada[]): void {
   const areas = Array.from(porDepartamento.entries())
     .map(([area, itens]) => {
       const total = itens.reduce((soma, item) => soma + item.minutosParados, 0);
-      const topProblemas = gerarRanking(itens, (item) => item.tipo).slice(0, 3);
+      const totalPerdas = itens.reduce((soma, item) => soma + item.perdas, 0);
+      const topProblemas = agruparEstatisticasPorTipo(itens)
+        .sort((a, b) => b.perdas - a.perdas)
+        .slice(0, 3);
       const responsaveis = extrairResponsaveis(itens);
-      return { area, total, topProblemas, responsaveis };
+      return { area, total, totalPerdas, topProblemas, responsaveis };
     })
-    .sort((a, b) => b.total - a.total);
+    .sort((a, b) => b.totalPerdas - a.totalPerdas);
 
   ui.problemasPorArea.innerHTML = areas
     .map((area) => {
       const listaProblemas = area.topProblemas
         .map(
-          (problema) =>
-            `<li>${escaparHtml(traduzirDinamico(problema.label))} <span class="problem-minutes">(${formatadorNumero.format(problema.total)} ${escaparHtml(t.minuteUnit)})</span></li>`,
+          (problema) => `
+            <li>
+              ${escaparHtml(traduzirDinamico(problema.label))} <span class="problem-minutes">(${formatadorNumero.format(problema.total)} ${escaparHtml(t.minuteUnit)})</span>
+              <div class="problem-pieces">${formatadorInteiro.format(problema.perdas)} ${escaparHtml(t.piecesLostSuffix)}</div>
+            </li>
+          `,
         )
         .join("");
 
@@ -1293,7 +1350,7 @@ function renderizarTabelaProblemas(registros: RegistroParada[]): void {
 
   if (!registros.length) {
     ui.corpoTabela.innerHTML =
-      `<tr><td colspan="8"><div class="empty-state">${escaparHtml(t.emptyTable)}</div></td></tr>`;
+      `<tr><td colspan="9"><div class="empty-state">${escaparHtml(t.emptyTable)}</div></td></tr>`;
     return;
   }
 
@@ -1317,6 +1374,7 @@ function renderizarTabelaProblemas(registros: RegistroParada[]): void {
           <td>${escaparHtml(traduzirDinamico(item.descricao))}</td>
           <td>${escaparHtml(traduzirDinamico(item.modelo))}</td>
           <td class="text-end fw-bold">${formatadorNumero.format(item.minutosParados)}</td>
+          <td class="text-end">${formatadorInteiro.format(item.perdas)}</td>
           <td>${renderizarBadgeStatus(item.status)}</td>
         </tr>
       `,
@@ -1330,12 +1388,14 @@ function renderizarEstadoVazio(): void {
   ui.kpiOcorrencias.textContent = "0";
   ui.kpiMinutosBrutos.textContent = "00:00";
   ui.kpiAreas.textContent = "0";
+  ui.kpiPerdas.textContent = "0";
+  ui.kpiValorTotal.textContent = formatadorMoeda.format(0);
 
-  destruirGraficoAreas();
-  ui.legendaAreas.innerHTML = `<li class="empty-state">${escaparHtml(t.emptyGeneric)}</li>`;
+  destruirGraficoPerdas();
+  ui.legendaPerdas.innerHTML = `<li class="empty-state">${escaparHtml(t.emptyGeneric)}</li>`;
   ui.rankingTurnos.innerHTML = `<div class="empty-state">${escaparHtml(t.emptyGeneric)}</div>`;
   ui.problemasPorArea.innerHTML = `<div class="col-12"><div class="empty-state">${escaparHtml(t.emptyGeneric)}</div></div>`;
-  ui.corpoTabela.innerHTML = `<tr><td colspan="8"><div class="empty-state">${escaparHtml(t.emptyGeneric)}</div></td></tr>`;
+  ui.corpoTabela.innerHTML = `<tr><td colspan="9"><div class="empty-state">${escaparHtml(t.emptyGeneric)}</div></td></tr>`;
 }
 
 function formatarDuracaoHoras(totalMinutos: number): string {
@@ -1345,17 +1405,18 @@ function formatarDuracaoHoras(totalMinutos: number): string {
   return `${String(horas).padStart(2, "0")}:${String(minutos).padStart(2, "0")}`;
 }
 
-function gerarRanking(registros: RegistroParada[], chave: (item: RegistroParada) => string): ItemRanking[] {
-  const acumulado = new Map<string, number>();
+type EstatisticaTipo = { label: string; total: number; perdas: number };
 
+function agruparEstatisticasPorTipo(registros: RegistroParada[]): EstatisticaTipo[] {
+  const mapa = new Map<string, { total: number; perdas: number }>();
   for (const item of registros) {
-    const label = chave(item) || "Sem informação";
-    acumulado.set(label, (acumulado.get(label) ?? 0) + item.minutosParados);
+    const tipo = item.tipo || "Sem informação";
+    const atual = mapa.get(tipo) ?? { total: 0, perdas: 0 };
+    atual.total += item.minutosParados;
+    atual.perdas += item.perdas;
+    mapa.set(tipo, atual);
   }
-
-  return Array.from(acumulado.entries())
-    .map(([label, total]) => ({ label, total }))
-    .sort((a, b) => b.total - a.total);
+  return Array.from(mapa.entries()).map(([label, stats]) => ({ label, ...stats }));
 }
 
 function agruparPor(

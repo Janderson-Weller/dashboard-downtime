@@ -27,6 +27,8 @@ export type TranslationPack = {
   kpiGrossMinutes: string;
   kpiLineMinutes: string;
   kpiAreas: string;
+  kpiLosses: string;
+  kpiUnitValue: string;
   filterMonth: string;
   filterDay: string;
   filterShift: string;
@@ -41,6 +43,10 @@ export type TranslationPack = {
   allStatuses: string;
   areasCardTitle: string;
   areasCardPill: string;
+  lossesCardTitle: string;
+  lossesCardPill: string;
+  lossesPieAriaLabel: string;
+  pieceUnit: string;
   shiftsCardTitle: string;
   shiftsCardPill: string;
   problemsByAreaTitle: string;
@@ -55,6 +61,8 @@ export type TranslationPack = {
   thModel: string;
   thStatus: string;
   thMinutes: string;
+  thPiecesLost: string;
+  piecesLostSuffix: string;
   pieAriaLabel: string;
   emptyChart: string;
   emptyShifts: string;
@@ -104,6 +112,8 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
     kpiGrossMinutes: "Horas paradas",
     kpiLineMinutes: "Minutos reais de linha",
     kpiAreas: "Áreas impactadas",
+    kpiLosses: "Total de perdas",
+    kpiUnitValue: "Valor total",
     filterMonth: "Filtrar por mês",
     filterDay: "Filtrar por dia",
     filterShift: "Filtrar por turno",
@@ -118,6 +128,10 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
     allStatuses: "Todos os status",
     areasCardTitle: "Áreas por tempo de parada",
     areasCardPill: "Ordenado do maior para o menor",
+    lossesCardTitle: "Áreas por peças perdidas",
+    lossesCardPill: "Ordenado do maior para o menor",
+    lossesPieAriaLabel: "Gráfico de pizza das áreas por perdas",
+    pieceUnit: "pçs",
     shiftsCardTitle: "Top 3 turnos com mais parada",
     shiftsCardPill: "Acumulado por turno",
     problemsByAreaTitle: "Top 3 problemas de cada área",
@@ -132,6 +146,8 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
     thModel: "Modelo do produto",
     thStatus: "Status",
     thMinutes: "Minutos",
+    thPiecesLost: "Peças perdidas",
+    piecesLostSuffix: "peças perdidas",
     pieAriaLabel: "Gráfico de pizza das áreas",
     emptyChart: "Sem dados para exibir o gráfico.",
     emptyShifts: "Sem dados para o ranking de turnos.",
@@ -177,6 +193,8 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
     kpiGrossMinutes: "Downtime hours",
     kpiLineMinutes: "Real line minutes",
     kpiAreas: "Impacted areas",
+    kpiLosses: "Total losses",
+    kpiUnitValue: "Total value",
     filterMonth: "Filter by month",
     filterDay: "Filter by day",
     filterShift: "Filter by shift",
@@ -191,6 +209,10 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
     allStatuses: "All statuses",
     areasCardTitle: "Areas by downtime",
     areasCardPill: "Sorted from highest to lowest",
+    lossesCardTitle: "Areas by lost pieces",
+    lossesCardPill: "Sorted from highest to lowest",
+    lossesPieAriaLabel: "Areas pie chart by losses",
+    pieceUnit: "pcs",
     shiftsCardTitle: "Top 3 shifts with most downtime",
     shiftsCardPill: "Total by shift",
     problemsByAreaTitle: "Top 3 problems by area",
@@ -205,6 +227,8 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
     thModel: "Product model",
     thStatus: "Status",
     thMinutes: "Minutes",
+    thPiecesLost: "Lost pieces",
+    piecesLostSuffix: "pieces lost",
     pieAriaLabel: "Areas pie chart",
     emptyChart: "No data to display the chart.",
     emptyShifts: "No data for shift ranking.",
@@ -250,6 +274,8 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
     kpiGrossMinutes: "停机小时",
     kpiLineMinutes: "产线实际分钟",
     kpiAreas: "受影响区域",
+    kpiLosses: "损失总数",
+    kpiUnitValue: "总价值",
     filterMonth: "按月份筛选",
     filterDay: "按日期筛选",
     filterShift: "按班次筛选",
@@ -264,6 +290,10 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
     allStatuses: "全部状态",
     areasCardTitle: "按停机时长的区域",
     areasCardPill: "按从高到低排序",
+    lossesCardTitle: "按损失数量的区域",
+    lossesCardPill: "按从高到低排序",
+    lossesPieAriaLabel: "区域按损失饼图",
+    pieceUnit: "件",
     shiftsCardTitle: "停机最多的前3个班次",
     shiftsCardPill: "按班次汇总",
     problemsByAreaTitle: "各区域前3个问题",
@@ -278,6 +308,8 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
     thModel: "产品型号",
     thStatus: "状态",
     thMinutes: "分钟",
+    thPiecesLost: "损失件数",
+    piecesLostSuffix: "件已损失",
     pieAriaLabel: "区域饼图",
     emptyChart: "没有可显示的图表数据。",
     emptyShifts: "没有班次排名数据。",
@@ -323,6 +355,8 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
     kpiGrossMinutes: "Stillstandsstunden",
     kpiLineMinutes: "Reale Linienminuten",
     kpiAreas: "Betroffene Bereiche",
+    kpiLosses: "Verluste gesamt",
+    kpiUnitValue: "Gesamtwert",
     filterMonth: "Nach Monat filtern",
     filterDay: "Nach Tag filtern",
     filterShift: "Nach Schicht filtern",
@@ -337,6 +371,10 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
     allStatuses: "Alle Status",
     areasCardTitle: "Bereiche nach Stillstandszeit",
     areasCardPill: "Absteigend sortiert",
+    lossesCardTitle: "Bereiche nach verlorenen Stücken",
+    lossesCardPill: "Absteigend sortiert",
+    lossesPieAriaLabel: "Bereichs-Kreisdiagramm nach Verlusten",
+    pieceUnit: "Stk",
     shiftsCardTitle: "Top 3 Schichten mit den meisten Ausfällen",
     shiftsCardPill: "Summiert nach Schicht",
     problemsByAreaTitle: "Top 3 Probleme je Bereich",
@@ -351,6 +389,8 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
     thModel: "Produktmodell",
     thStatus: "Status",
     thMinutes: "Minuten",
+    thPiecesLost: "Verlorene Stücke",
+    piecesLostSuffix: "Stücke verloren",
     pieAriaLabel: "Bereichs-Kreisdiagramm",
     emptyChart: "Keine Daten für das Diagramm.",
     emptyShifts: "Keine Daten für das Schichtranking.",
@@ -396,6 +436,8 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
     kpiGrossMinutes: "Horas de parada",
     kpiLineMinutes: "Minutos reales de línea",
     kpiAreas: "Áreas impactadas",
+    kpiLosses: "Total de pérdidas",
+    kpiUnitValue: "Valor total",
     filterMonth: "Filtrar por mes",
     filterDay: "Filtrar por día",
     filterShift: "Filtrar por turno",
@@ -410,6 +452,10 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
     allStatuses: "Todos los estados",
     areasCardTitle: "Áreas por tiempo de parada",
     areasCardPill: "Ordenado de mayor a menor",
+    lossesCardTitle: "Áreas por piezas perdidas",
+    lossesCardPill: "Ordenado de mayor a menor",
+    lossesPieAriaLabel: "Gráfico circular de áreas por pérdidas",
+    pieceUnit: "pzs",
     shiftsCardTitle: "Top 3 turnos con más paradas",
     shiftsCardPill: "Acumulado por turno",
     problemsByAreaTitle: "Top 3 problemas por área",
@@ -424,6 +470,8 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
     thModel: "Modelo del producto",
     thStatus: "Estado",
     thMinutes: "Minutos",
+    thPiecesLost: "Piezas perdidas",
+    piecesLostSuffix: "piezas perdidas",
     pieAriaLabel: "Gráfico circular de áreas",
     emptyChart: "Sin datos para mostrar el gráfico.",
     emptyShifts: "Sin datos para el ranking de turnos.",
@@ -469,6 +517,8 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
     kpiGrossMinutes: "ساعات التوقف",
     kpiLineMinutes: "دقائق الخط الفعلية",
     kpiAreas: "المناطق المتأثرة",
+    kpiLosses: "إجمالي الخسائر",
+    kpiUnitValue: "القيمة الإجمالية",
     filterMonth: "تصفية حسب الشهر",
     filterDay: "تصفية حسب اليوم",
     filterShift: "تصفية حسب الوردية",
@@ -483,6 +533,10 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
     allStatuses: "كل الحالات",
     areasCardTitle: "المناطق حسب زمن التوقف",
     areasCardPill: "مرتبة من الأكبر إلى الأصغر",
+    lossesCardTitle: "المناطق حسب القطع المفقودة",
+    lossesCardPill: "مرتبة من الأكبر إلى الأصغر",
+    lossesPieAriaLabel: "مخطط دائري للمناطق حسب الخسائر",
+    pieceUnit: "قطعة",
     shiftsCardTitle: "أكثر 3 ورديات توقفاً",
     shiftsCardPill: "إجمالي حسب الوردية",
     problemsByAreaTitle: "أعلى 3 مشاكل لكل منطقة",
@@ -497,6 +551,8 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
     thModel: "طراز المنتج",
     thStatus: "الحالة",
     thMinutes: "الدقائق",
+    thPiecesLost: "القطع المفقودة",
+    piecesLostSuffix: "قطعة مفقودة",
     pieAriaLabel: "مخطط دائري للمناطق",
     emptyChart: "لا توجد بيانات لعرض المخطط.",
     emptyShifts: "لا توجد بيانات لترتيب الورديات.",

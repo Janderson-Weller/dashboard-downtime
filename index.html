@@ -57,6 +57,14 @@
               <span id="kpiAreasLabel">Áreas impactadas</span>
               <strong id="kpiAreas">0</strong>
             </article>
+            <article class="kpi-card">
+              <span id="kpiLossesLabel">Total de perdas</span>
+              <strong id="kpiLosses">0</strong>
+            </article>
+            <article class="kpi-card">
+              <span id="kpiUnitValueLabel">Valor unitário</span>
+              <strong id="kpiUnitValue">0</strong>
+            </article>
           </div>
         </div>
       </section>
@@ -98,13 +106,13 @@
         <div class="col-lg-7">
           <article class="panel-card h-100 fade-in" style="animation-delay: 120ms">
             <div class="d-flex justify-content-between flex-wrap gap-2 mb-3">
-              <h2 id="areasCardTitle" class="section-title mb-0">Áreas por tempo de parada</h2>
-              <span id="areasCardPill" class="pill">Ordenado do maior para o menor</span>
+              <h2 id="lossesCardTitle" class="section-title mb-0">Áreas por peças perdidas</h2>
+              <span id="lossesCardPill" class="pill">Ordenado do maior para o menor</span>
             </div>
             <div class="chart-wrap">
-              <canvas id="areasPieChart" aria-label="Gráfico de pizza das áreas"></canvas>
+              <canvas id="lossesPieChart" aria-label="Gráfico de pizza das áreas por perdas"></canvas>
             </div>
-            <ul id="areasLegend" class="legend-list mt-3 mb-0"></ul>
+            <ul id="lossesLegend" class="legend-list mt-3 mb-0"></ul>
           </article>
         </div>
 
@@ -149,6 +157,7 @@
                 <th id="thDescription">Descrição</th>
                 <th id="thModel">Modelo do produto</th>
                 <th id="thMinutes" class="text-end">Minutos</th>
+                <th id="thPiecesLost" class="text-end">Peças perdidas</th>
                 <th id="thStatus">Status</th>
               </tr>
             </thead>

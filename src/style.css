@@ -65,6 +65,7 @@ body {
   font-weight: 700;
   color: #1a3550;
   cursor: pointer;
+  margin-left: 0.5rem;
 }
 
 .dashboard-shell {
@@ -329,6 +330,21 @@ body {
   background: linear-gradient(90deg, var(--brand), var(--brand-2));
 }
 
+.rank-row-secondary {
+  margin-top: 0.5rem;
+  margin-bottom: 0.3rem;
+}
+
+.rank-sublabel {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.progress-losses .progress-bar {
+  background: linear-gradient(90deg, #e07a3d, #c44d3a);
+}
+
 .area-card {
   border-radius: 14px;
   border: 1px solid #dce8f1;
@@ -363,6 +379,12 @@ body {
 .problem-minutes {
   color: var(--text-muted);
   font-weight: 700;
+}
+
+.problem-pieces {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-top: 0.1rem;
 }
 
 .problems-table thead th {
